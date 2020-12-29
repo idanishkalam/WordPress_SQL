@@ -1,0 +1,52 @@
+version: "3"
+
+services:
+  mysql_db:
+    container_name: mysql_container
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: m_wordpress
+      MYSQL_USER: wordpress_user
+      MYSQL_PASSWORD: wordpress_user_password
+    volumes:
+      - mysql_db_data:/var/lib/mysql
+    networks:
+      - danish_faisal_network
+  #phpmyadmin
+  phpmyadmin:
+    depends_on:
+      - mysql_db
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+     - '8080:80'
+    environment:
+      PMA_HOST: mysql_db
+      MYSQL_ROOT_PASSWORD: password
+    networks:
+      - danish_faisal_network
+  #Wordpress (image based on Apache)
+  wordpress:
+    depends_on:
+      - mysql_db
+    image: wordpress:latest
+    restart: always
+    ports:
+      - "8000:80"
+    environment:
+      WORDPRESS_DB_HOST: mysql_db:3306
+      WORDPRESS_DB_USER: wordpress_user
+      WORDPRESS_DB_PASSWORD: wordpress_user_password
+      WORDPRESS_DB_NAME: m_wordpress
+    volumes:
+      [
+        "./:/var/www/html"
+      ]
+    networks:
+      - danish_faisal_network
+networks:
+  danish_faisal_network:
+volumes:
+  mysql_db_data:
